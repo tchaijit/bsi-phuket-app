@@ -11,6 +11,9 @@ import MapContextMenu from '@/components/map/MapContextMenu';
 import { CATEGORY_META, STATUS_META } from '@/data/constants';
 import type { PartnerCategory, ContractStatus, Partner } from '@/types';
 
+// Disable static generation for this page
+export const dynamic = 'force-dynamic';
+
 // Dynamic import for MapView to prevent SSR issues with Leaflet
 const MapView = dynamic(() => import('@/components/dashboard/MapView'), {
   ssr: false,

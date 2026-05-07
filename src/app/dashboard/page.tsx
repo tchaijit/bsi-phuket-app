@@ -11,6 +11,9 @@ import ContractExpiryChart from '@/components/dashboard/ContractExpiryChart';
 import ZoneDistribution from '@/components/dashboard/ZoneDistribution';
 import { Building2, FileText, AlertCircle, TrendingUp } from 'lucide-react';
 
+// Disable static generation for this page
+export const dynamic = 'force-dynamic';
+
 // Dynamic import for MapView to prevent SSR issues with Leaflet
 const MapView = dynamic(() => import('@/components/dashboard/MapView'), {
   ssr: false,
