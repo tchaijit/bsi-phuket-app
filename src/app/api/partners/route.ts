@@ -35,8 +35,8 @@ export async function GET() {
         name_th: p.name_th || undefined,
         category: p.category as any,
         zone: p.zone as any,
-        lat: p.lat,
-        lng: p.lng,
+        lat: typeof p.lat === 'string' ? parseFloat(p.lat) : p.lat,
+        lng: typeof p.lng === 'string' ? parseFloat(p.lng) : p.lng,
         strategic_note: p.strategic_note || undefined,
         contract: contract
           ? {
@@ -45,7 +45,7 @@ export async function GET() {
               start_date: contract.start_date || undefined,
               end_date: contract.end_date || undefined,
               renewal_owner: contract.renewal_owner || undefined,
-              value: contract.value || undefined,
+              value: typeof contract.value === 'string' ? parseFloat(contract.value) : contract.value,
             }
           : undefined,
       };
