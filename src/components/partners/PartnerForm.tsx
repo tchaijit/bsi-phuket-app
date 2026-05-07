@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect } from 'react';
 import { X, MapPin } from 'lucide-react';
 import { usePartnersStore } from '../../stores/partnersStore';
