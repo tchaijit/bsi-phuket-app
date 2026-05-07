@@ -1,10 +1,13 @@
+'use client';
+
 import { Bell, LogOut, Menu, User, X } from 'lucide-react';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../stores/authStore';
 import { useNotificationsStore } from '../../stores/notificationsStore';
-import { useNavigate } from 'react-router-dom';
 
 export default function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
+  const router = useRouter();
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const notifications = useNotificationsStore((state) => state.notifications);
@@ -13,11 +16,10 @@ export default function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    router.push('/login');
   };
 
   return (
