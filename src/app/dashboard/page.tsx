@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { usePartnersStore } from '@/stores/partnersStore';
@@ -8,8 +9,13 @@ import MainLayout from '@/components/layout/MainLayout';
 import StatsCard from '@/components/dashboard/StatsCard';
 import ContractExpiryChart from '@/components/dashboard/ContractExpiryChart';
 import ZoneDistribution from '@/components/dashboard/ZoneDistribution';
-import MapView from '@/components/dashboard/MapView';
 import { Building2, FileText, AlertCircle, TrendingUp } from 'lucide-react';
+
+// Dynamic import for MapView to prevent SSR issues with Leaflet
+const MapView = dynamic(() => import('@/components/dashboard/MapView'), {
+  ssr: false,
+  loading: () => <div className="h-96 bg-gray-100 rounded-xl animate-pulse"></div>,
+});
 
 export default function DashboardPage() {
   const router = useRouter();
