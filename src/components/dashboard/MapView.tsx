@@ -167,9 +167,49 @@ export default function MapView({ onMapClick, enableClickToAdd = false, clearTem
         iconAnchor: [16, 16],
       });
 
-      const marker = LeafletRef.current.marker([partner.lat, partner.lng], { icon })
+      const marker = LeafletRef.current.marker([partner.lat, partner.lng], {
+        icon,
+        draggable: true // Make marker draggable
+      })
         .bindPopup(createPopupContent(partner))
         .on('click', () => selectPartner(partner))
+        .on('dragend', async (e: any) => {
+          const newPos = e.target.getLatLng();
+          const confirmed = window.confirm(
+            `Update location for ${partner.name_en}?\n\nNew coordinates:\nLat: ${newPos.lat.toFixed(6)}\nLng: ${newPos.lng.toFixed(6)}`
+          );
+
+          if (confirmed) {
+            try {
+              const response = await fetch(`/api/partners/${partner.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  lat: newPos.lat,
+                  lng: newPos.lng,
+                }),
+              });
+
+              if (response.ok) {
+                alert('Location updated successfully!');
+                // Refresh partners list
+                window.location.reload();
+              } else {
+                alert('Failed to update location');
+                // Reset marker position
+                marker.setLatLng([partner.lat, partner.lng]);
+              }
+            } catch (error) {
+              console.error('Update error:', error);
+              alert('Error updating location');
+              // Reset marker position
+              marker.setLatLng([partner.lat, partner.lng]);
+            }
+          } else {
+            // Reset marker position if cancelled
+            marker.setLatLng([partner.lat, partner.lng]);
+          }
+        })
         .addTo(mapRef.current!);
 
       markersRef.current.push(marker);
