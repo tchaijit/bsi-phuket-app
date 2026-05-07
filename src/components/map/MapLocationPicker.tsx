@@ -1,8 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 import { MapPin, X } from 'lucide-react';
 
 interface MapLocationPickerProps {
@@ -18,14 +16,18 @@ export default function MapLocationPicker({
   onLocationSelect,
   onClose,
 }: MapLocationPickerProps) {
-  const mapRef = useRef<L.Map | null>(null);
-  const markerRef = useRef<L.Marker | null>(null);
+  const mapRef = useRef<any>(null);
+  const markerRef = useRef<any>(null);
   const [selectedCoords, setSelectedCoords] = useState({ lat: initialLat, lng: initialLng });
 
   useEffect(() => {
     if (mapRef.current) return;
 
-    const map = L.map('location-picker-map').setView([initialLat, initialLng], 13);
+    const initMap = async () => {
+      const L = (await import('leaflet')).default;
+      await import('leaflet/dist/leaflet.css');
+
+      const map = L.map('location-picker-map').setView([initialLat, initialLng], 13);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors',
@@ -71,14 +73,17 @@ export default function MapLocationPicker({
       marker.openPopup();
     });
 
-    mapRef.current = map;
-    markerRef.current = marker;
+      mapRef.current = map;
+      markerRef.current = marker;
 
-    return () => {
-      map.remove();
-      mapRef.current = null;
-      markerRef.current = null;
+      return () => {
+        map.remove();
+        mapRef.current = null;
+        markerRef.current = null;
+      };
     };
+
+    initMap();
   }, [initialLat, initialLng]);
 
   const handleConfirm = () => {

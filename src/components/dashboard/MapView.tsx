@@ -1,17 +1,9 @@
+'use client';
+
 import { useEffect, useRef } from 'react';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 import { usePartnersStore } from '../../stores/partnersStore';
 import { CATEGORY_META, MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM } from '../../data/constants';
 import type { Partner } from '../../types';
-
-// Fix for default marker icons in Leaflet
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-});
 
 interface MapViewProps {
   onMapClick?: (lat: number, lng: number, x: number, y: number) => void;
@@ -20,9 +12,9 @@ interface MapViewProps {
 }
 
 export default function MapView({ onMapClick, enableClickToAdd = false, clearTempMarker = false }: MapViewProps = {}) {
-  const mapRef = useRef<L.Map | null>(null);
-  const markersRef = useRef<L.Marker[]>([]);
-  const tempMarkerRef = useRef<L.Marker | null>(null);
+  const mapRef = useRef<any>(null);
+  const markersRef = useRef<any[]>([]);
+  const tempMarkerRef = useRef<any>(null);
   const isRightClickActiveRef = useRef<boolean>(false);
   const filteredPartners = usePartnersStore((state) => state.filteredPartners);
   const selectPartner = usePartnersStore((state) => state.selectPartner);
@@ -33,8 +25,21 @@ export default function MapView({ onMapClick, enableClickToAdd = false, clearTem
       return;
     }
 
-    // Use same config as TestMap that works
-    mapRef.current = L.map('map', {
+    // Dynamic import of Leaflet to avoid SSR issues
+    const initMap = async () => {
+      const L = (await import('leaflet')).default;
+      await import('leaflet/dist/leaflet.css');
+
+      // Fix for default marker icons in Leaflet
+      delete (L.Icon.Default.prototype as any)._getIconUrl;
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+      });
+
+      // Use same config as TestMap that works
+      mapRef.current = L.map('map', {
       scrollWheelZoom: 'center',
       doubleClickZoom: true,
       touchZoom: true,
@@ -96,6 +101,9 @@ export default function MapView({ onMapClick, enableClickToAdd = false, clearTem
         return false;
       });
     }
+    };
+
+    initMap();
 
     // DON'T cleanup map to prevent re-initialization issues
     // Map will be cleaned up when component truly unmounts
