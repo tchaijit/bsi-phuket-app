@@ -29,7 +29,7 @@ export async function GET() {
     const partnersWithContracts: Partner[] = partners.map((p) => {
       const contract = contracts.find((c) => c.partner_id === p.id);
 
-      return {
+      const partner: Partner = {
         id: p.id,
         name_en: p.name_en,
         name_th: p.name_th || undefined,
@@ -51,6 +51,8 @@ export async function GET() {
             }
           : undefined,
       };
+
+      return partner;
     });
 
     return NextResponse.json({ partners: partnersWithContracts });
