@@ -169,10 +169,23 @@ export default function MapView({ onMapClick, enableClickToAdd = false, clearTem
 
       const marker = LeafletRef.current.marker([partner.lat, partner.lng], {
         icon,
-        draggable: true // Make marker draggable
+        draggable: true, // Make marker draggable
+        autoPan: true,
       })
-        .bindPopup(createPopupContent(partner))
-        .on('click', () => selectPartner(partner))
+        .bindPopup(createPopupContent(partner), {
+          closeButton: true,
+          autoClose: true,
+        })
+        .on('click', (e: any) => {
+          // Only trigger select if not dragging
+          if (!marker.dragging._draggable._moving) {
+            selectPartner(partner);
+          }
+        })
+        .on('dragstart', () => {
+          // Close popup when starting to drag
+          marker.closePopup();
+        })
         .on('dragend', async (e: any) => {
           const newPos = e.target.getLatLng();
           const confirmed = window.confirm(
