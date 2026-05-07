@@ -24,7 +24,8 @@ export const computeZoneScores = (partners: Partner[]): Record<ZoneName, ZoneSco
     const zone = zones[zoneName as ZoneName];
     const inZone = partners.filter((p) => p.zone === zoneName);
     const bsiPartners = inZone.filter((p) => PARTNER_CATEGORIES.includes(p.category));
-    const competitors = inZone.filter((p) => p.category === 'competitor');
+    // Note: No longer tracking competitors separately as all hospitals are now 'hospital' category
+    const competitors = inZone.filter((p) => p.competitor_details); // Count by competitor_details instead
 
     const active = bsiPartners.filter((p) => deriveStatus(p) === 'active').length;
     const expiring = bsiPartners.filter((p) => deriveStatus(p) === 'expiring_soon').length;
@@ -66,7 +67,7 @@ export const computeZoneScores = (partners: Partner[]): Record<ZoneName, ZoneSco
     const distinctCategories = new Set(
       bsiPartners.filter((p) => deriveStatus(p) === 'active').map((p) => p.category)
     ).size;
-    const diversity = (distinctCategories / 6) * 100;
+    const diversity = (distinctCategories / 8) * 100; // Changed from 6 to 8 categories
 
     // Cluster cannibalization (placeholder)
     const cluster = 100;
@@ -103,8 +104,9 @@ export const findWhitespace = (partners: Partner[]): WhitespaceOpportunity[] => 
         (p) => p.zone === zoneName && p.category === category && deriveStatus(p) === 'active'
       ).length;
 
+      // Count competitors by checking for competitor_details
       const compCount = partners.filter(
-        (p) => p.zone === zoneName && p.category === 'competitor'
+        (p) => p.zone === zoneName && p.competitor_details
       ).length;
 
       if (bsiCount === 0 && compCount >= 1) {
