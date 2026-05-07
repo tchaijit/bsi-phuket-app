@@ -8,12 +8,6 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react', 'leaflet'],
   },
-
-  // Webpack config for Leaflet
-  webpack: (config) => {
-    config.externals = [...(config.externals || []), { canvas: 'canvas' }];
-    return config;
-  },
 };
 
 export default nextConfig;
