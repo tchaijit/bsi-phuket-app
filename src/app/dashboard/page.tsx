@@ -9,7 +9,7 @@ import StatsCard from '@/components/dashboard/StatsCard';
 import ContractExpiryChart from '@/components/dashboard/ContractExpiryChart';
 import ZoneDistribution from '@/components/dashboard/ZoneDistribution';
 import MapView from '@/components/dashboard/MapView';
-import { Building2, FileContract, AlertCircle, TrendingUp } from 'lucide-react';
+import { Building2, FileText, AlertCircle, TrendingUp } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -52,7 +52,7 @@ export default function DashboardPage() {
           <StatsCard
             title="Active Contracts"
             value={activeContracts}
-            icon={FileContract}
+            icon={FileText}
             trend="+8%"
             color="green"
           />
