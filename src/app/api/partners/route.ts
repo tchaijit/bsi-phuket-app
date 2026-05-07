@@ -45,7 +45,9 @@ export async function GET() {
               start_date: contract.start_date || undefined,
               end_date: contract.end_date || undefined,
               renewal_owner: contract.renewal_owner || undefined,
-              value: typeof contract.value === 'string' ? parseFloat(contract.value) : contract.value,
+              value: contract.value
+                ? (typeof contract.value === 'string' ? parseFloat(contract.value) : contract.value)
+                : undefined,
             }
           : undefined,
       };
