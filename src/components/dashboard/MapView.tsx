@@ -17,6 +17,7 @@ export default function MapView({ onMapClick, enableClickToAdd = false, clearTem
   const tempMarkerRef = useRef<any>(null);
   const isRightClickActiveRef = useRef<boolean>(false);
   const LeafletRef = useRef<any>(null); // Store Leaflet library reference
+  const relocatingPartnerRef = useRef<any>(null); // Store partner being relocated
   const filteredPartners = usePartnersStore((state) => state.filteredPartners);
   const selectPartner = usePartnersStore((state) => state.selectPartner);
 
@@ -167,67 +168,115 @@ export default function MapView({ onMapClick, enableClickToAdd = false, clearTem
         iconAnchor: [16, 16],
       });
 
-      const marker = LeafletRef.current.marker([partner.lat, partner.lng], {
-        icon,
-        draggable: true, // Make marker draggable
-        autoPan: true,
-      })
-        .bindPopup(createPopupContent(partner), {
-          closeButton: true,
-          autoClose: true,
-        })
-        .on('click', (e: any) => {
-          // Only trigger select if not dragging
-          if (!marker.dragging._draggable._moving) {
-            selectPartner(partner);
-          }
-        })
-        .on('dragstart', () => {
-          // Close popup when starting to drag
-          marker.closePopup();
-        })
-        .on('dragend', async (e: any) => {
-          const newPos = e.target.getLatLng();
-          const confirmed = window.confirm(
-            `Update location for ${partner.name_en}?\n\nNew coordinates:\nLat: ${newPos.lat.toFixed(6)}\nLng: ${newPos.lng.toFixed(6)}`
-          );
+      const marker = LeafletRef.current.marker([partner.lat, partner.lng], { icon })
+        .bindPopup(createPopupContent(partner))
+        .on('click', () => selectPartner(partner))
+        .on('contextmenu', (e: any) => {
+          e.originalEvent.preventDefault();
 
-          if (confirmed) {
-            try {
-              const response = await fetch(`/api/partners/${partner.id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  lat: newPos.lat,
-                  lng: newPos.lng,
-                }),
-              });
+          // Show custom context menu
+          const menu = document.createElement('div');
+          menu.className = 'leaflet-contextmenu';
+          menu.style.cssText = `
+            position: absolute;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            z-index: 10000;
+            min-width: 180px;
+          `;
 
-              if (response.ok) {
-                alert('Location updated successfully!');
-                // Refresh partners list
-                window.location.reload();
-              } else {
-                alert('Failed to update location');
-                // Reset marker position
-                marker.setLatLng([partner.lat, partner.lng]);
+          menu.innerHTML = `
+            <div style="padding: 8px 12px; cursor: pointer; font-size: 14px; border-bottom: 1px solid #eee;">
+              <strong>${partner.name_en}</strong>
+            </div>
+            <div class="menu-item" style="padding: 8px 12px; cursor: pointer; font-size: 14px; transition: background 0.2s;"
+                 onmouseover="this.style.background='#f0f0f0'"
+                 onmouseout="this.style.background='white'">
+              📍 ย้ายตำแหน่ง
+            </div>
+          `;
+
+          document.body.appendChild(menu);
+
+          // Position menu at cursor
+          const rect = mapRef.current.getContainer().getBoundingClientRect();
+          menu.style.left = `${e.originalEvent.clientX}px`;
+          menu.style.top = `${e.originalEvent.clientY}px`;
+
+          // Handle menu click
+          const menuItem = menu.querySelector('.menu-item');
+          menuItem?.addEventListener('click', () => {
+            document.body.removeChild(menu);
+            startRelocation(partner, marker);
+          });
+
+          // Close menu on outside click
+          const closeMenu = (evt: MouseEvent) => {
+            if (!menu.contains(evt.target as Node)) {
+              if (document.body.contains(menu)) {
+                document.body.removeChild(menu);
               }
-            } catch (error) {
-              console.error('Update error:', error);
-              alert('Error updating location');
-              // Reset marker position
-              marker.setLatLng([partner.lat, partner.lng]);
+              document.removeEventListener('click', closeMenu);
             }
-          } else {
-            // Reset marker position if cancelled
-            marker.setLatLng([partner.lat, partner.lng]);
-          }
+          };
+
+          setTimeout(() => {
+            document.addEventListener('click', closeMenu);
+          }, 100);
         })
         .addTo(mapRef.current!);
 
       markersRef.current.push(marker);
     });
   }, [filteredPartners, selectPartner]);
+
+  const startRelocation = (partner: Partner, marker: any) => {
+    relocatingPartnerRef.current = { partner, marker };
+
+    // Change cursor
+    mapRef.current.getContainer().style.cursor = 'crosshair';
+
+    // Show instruction
+    alert('คลิกที่แผนที่เพื่อเลือกตำแหน่งใหม่สำหรับ ' + partner.name_en);
+
+    // Add click handler
+    const handleMapClick = async (e: any) => {
+      const { lat, lng } = e.latlng;
+
+      const confirmed = window.confirm(
+        `ยืนยันย้ายตำแหน่ง ${partner.name_en}?\n\nตำแหน่งใหม่:\nLat: ${lat.toFixed(6)}\nLng: ${lng.toFixed(6)}`
+      );
+
+      if (confirmed) {
+        try {
+          const response = await fetch(`/api/partners/${partner.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ lat, lng }),
+          });
+
+          if (response.ok) {
+            alert('อัพเดทตำแหน่งสำเร็จ!');
+            window.location.reload();
+          } else {
+            alert('ไม่สามารถอัพเดทตำแหน่งได้');
+          }
+        } catch (error) {
+          console.error('Update error:', error);
+          alert('เกิดข้อผิดพลาดในการอัพเดท');
+        }
+      }
+
+      // Clean up
+      mapRef.current.off('click', handleMapClick);
+      mapRef.current.getContainer().style.cursor = '';
+      relocatingPartnerRef.current = null;
+    };
+
+    mapRef.current.on('click', handleMapClick);
+  };
 
   const createPopupContent = (partner: Partner): string => {
     const categoryMeta = CATEGORY_META[partner.category];
