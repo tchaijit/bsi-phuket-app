@@ -12,22 +12,23 @@ export interface User {
 
 // Partner Categories
 export type PartnerCategory =
-  | 'hotel'
-  | 'insurance'
+  | 'hospital'
   | 'clinic'
-  | 'corporate'
-  | 'mall'
-  | 'school'
-  | 'government'
-  | 'competitor'
-  | 'bdms';
+  | 'hotel'
+  | 'tour_operator'
+  | 'insurance'
+  | 'transport'
+  | 'pharmacy'
+  | 'other';
 
 // Contract Status
 export type ContractStatus =
+  | 'prospect'
+  | 'negotiation'
   | 'active'
   | 'expiring_soon'
   | 'expired'
-  | 'prospect'
+  | 'renewed'
   | 'terminated';
 
 // Zone Names
