@@ -6,9 +6,10 @@ import type { PartnerRow } from '@/lib/db';
 // PATCH /api/partners/[id] - Update partner location
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const user = await requireRole('manager');
     const body = await request.json();
     const { lat, lng } = body;
@@ -25,7 +26,7 @@ export async function PATCH(
     const updated = await sql<PartnerRow[]>`
       UPDATE partners
       SET lat = ${lat}, lng = ${lng}, updated_by = ${user.id}
-      WHERE id = ${params.id}
+      WHERE id = ${id}
       RETURNING *
     `;
 
@@ -43,7 +44,7 @@ export async function PATCH(
         ${user.id},
         'UPDATE',
         'partner',
-        ${params.id},
+        ${id},
         ${JSON.stringify({ lat, lng })}
       )
     `;
