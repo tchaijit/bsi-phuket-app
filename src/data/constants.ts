@@ -5,15 +5,14 @@ export const CATEGORY_META: Record<
   PartnerCategory,
   { color: string; icon: string; label: string }
 > = {
-  hotel: { color: '#1e88e5', icon: '🏨', label: 'Hotel' },
-  insurance: { color: '#43a047', icon: '📋', label: 'Insurance' },
+  hospital: { color: '#e53935', icon: '🏥', label: 'Hospital' },
   clinic: { color: '#fb8c00', icon: '🩺', label: 'Clinic' },
-  corporate: { color: '#8e24aa', icon: '🏢', label: 'Corporate' },
-  mall: { color: '#00897b', icon: '🛍️', label: 'Mall' },
-  school: { color: '#3949ab', icon: '🏫', label: 'School' },
-  government: { color: '#5e35b1', icon: '🏛️', label: 'Government' },
-  competitor: { color: '#e53935', icon: '⚕️', label: 'Competitor' },
-  bdms: { color: '#fdd835', icon: '★', label: 'BDMS' },
+  hotel: { color: '#1e88e5', icon: '🏨', label: 'Hotel' },
+  tour_operator: { color: '#00897b', icon: '✈️', label: 'Tour Operator' },
+  insurance: { color: '#43a047', icon: '📋', label: 'Insurance' },
+  transport: { color: '#5e35b1', icon: '🚗', label: 'Transport' },
+  pharmacy: { color: '#8e24aa', icon: '💊', label: 'Pharmacy' },
+  other: { color: '#9e9e9e', icon: '📍', label: 'Other' },
 };
 
 // Status Metadata
@@ -21,21 +20,25 @@ export const STATUS_META: Record<
   ContractStatus,
   { label: string; color: string }
 > = {
+  prospect: { label: 'Prospect', color: '#9e9e9e' },
+  negotiation: { label: 'Negotiation', color: '#3949ab' },
   active: { label: 'Active', color: '#43a047' },
   expiring_soon: { label: 'Expiring ≤90d', color: '#fb8c00' },
   expired: { label: 'Expired', color: '#e53935' },
-  prospect: { label: 'Prospect', color: '#9e9e9e' },
+  renewed: { label: 'Renewed', color: '#00897b' },
   terminated: { label: 'Terminated', color: '#424242' },
 };
 
 // Partner categories for filtering
 export const PARTNER_CATEGORIES: PartnerCategory[] = [
-  'hotel',
-  'insurance',
+  'hospital',
   'clinic',
-  'corporate',
-  'mall',
-  'school',
+  'hotel',
+  'tour_operator',
+  'insurance',
+  'transport',
+  'pharmacy',
+  'other',
 ];
 
 // Map default center (Phuket)
