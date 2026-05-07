@@ -45,6 +45,8 @@ export default function DashboardPage() {
 
   const activeContracts = partners.filter((p) => p.contract?.status === 'active').length;
   const expiringContracts = partners.filter((p) => p.contract?.status === 'expiring_soon').length;
+  const totalValue = partners.reduce((sum, p) => sum + (p.contract?.value || 0), 0);
+  const formattedValue = `฿${(totalValue / 1000000).toFixed(1)}M`;
 
   return (
     <MainLayout>
@@ -55,28 +57,24 @@ export default function DashboardPage() {
             title="Total Partners"
             value={partners.length}
             icon={Building2}
-            trend="+12%"
             color="blue"
           />
           <StatsCard
             title="Active Contracts"
             value={activeContracts}
             icon={FileText}
-            trend="+8%"
             color="green"
           />
           <StatsCard
             title="Expiring Soon"
             value={expiringContracts}
             icon={AlertCircle}
-            trend="-3%"
             color="yellow"
           />
           <StatsCard
-            title="Growth Rate"
-            value="15.3%"
+            title="Total Contract Value"
+            value={formattedValue}
             icon={TrendingUp}
-            trend="+2.1%"
             color="purple"
           />
         </div>
