@@ -16,6 +16,7 @@ export default function MapView({ onMapClick, enableClickToAdd = false, clearTem
   const markersRef = useRef<any[]>([]);
   const tempMarkerRef = useRef<any>(null);
   const isRightClickActiveRef = useRef<boolean>(false);
+  const LeafletRef = useRef<any>(null); // Store Leaflet library reference
   const filteredPartners = usePartnersStore((state) => state.filteredPartners);
   const selectPartner = usePartnersStore((state) => state.selectPartner);
 
@@ -29,6 +30,9 @@ export default function MapView({ onMapClick, enableClickToAdd = false, clearTem
     const initMap = async () => {
       const L = (await import('leaflet')).default;
       await import('leaflet/dist/leaflet.css');
+
+      // Store Leaflet reference for use in other effects
+      LeafletRef.current = L;
 
       // Fix for default marker icons in Leaflet
       delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -133,7 +137,7 @@ export default function MapView({ onMapClick, enableClickToAdd = false, clearTem
   }, [clearTempMarker]);
 
   useEffect(() => {
-    if (!mapRef.current) return;
+    if (!mapRef.current || !LeafletRef.current) return;
 
     // Clear existing markers
     markersRef.current.forEach((marker) => marker.remove());
@@ -144,7 +148,7 @@ export default function MapView({ onMapClick, enableClickToAdd = false, clearTem
       if (typeof partner.lat !== 'number' || typeof partner.lng !== 'number') return;
 
       const categoryMeta = CATEGORY_META[partner.category];
-      const icon = L.divIcon({
+      const icon = LeafletRef.current.divIcon({
         className: 'custom-marker',
         html: `<div style="
           background: ${categoryMeta.color};
@@ -163,7 +167,7 @@ export default function MapView({ onMapClick, enableClickToAdd = false, clearTem
         iconAnchor: [16, 16],
       });
 
-      const marker = L.marker([partner.lat, partner.lng], { icon })
+      const marker = LeafletRef.current.marker([partner.lat, partner.lng], { icon })
         .bindPopup(createPopupContent(partner))
         .on('click', () => selectPartner(partner))
         .addTo(mapRef.current!);
