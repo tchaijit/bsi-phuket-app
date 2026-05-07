@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import dynamic from 'next/dynamic';
+import dynamicImport from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { usePartnersStore } from '@/stores/partnersStore';
@@ -15,7 +15,7 @@ import type { PartnerCategory, ContractStatus, Partner } from '@/types';
 export const dynamic = 'force-dynamic';
 
 // Dynamic import for MapView to prevent SSR issues with Leaflet
-const MapView = dynamic(() => import('@/components/dashboard/MapView'), {
+const MapView = dynamicImport(() => import('@/components/dashboard/MapView'), {
   ssr: false,
   loading: () => (
     <div className="h-full flex items-center justify-center bg-gray-100">
