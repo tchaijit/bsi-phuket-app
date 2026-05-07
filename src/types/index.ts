@@ -48,6 +48,7 @@ export interface Contract {
   start_date?: string;
   end_date?: string;
   renewal_owner?: string;
+  value?: number;
   last_reviewed?: string;
 }
 
