@@ -44,6 +44,10 @@ export default function MapPage() {
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; lat: number; lng: number } | null>(null);
   const [editingPartner, setEditingPartner] = useState<Partner | null>(null);
 
+  const handleEditPartner = (partner: Partner) => {
+    setEditingPartner(partner);
+  };
+
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
@@ -88,6 +92,7 @@ export default function MapPage() {
         <div className="flex-1 relative">
           <MapView
             onMapClick={handleMapClick}
+            onEditPartner={handleEditPartner}
             enableClickToAdd={canEdit}
             clearTempMarker={contextMenu === null && editingPartner === null}
           />

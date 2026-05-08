@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm run dev:*)",
+      "Bash(taskkill:*)",
+      "Bash(powershell -Command \"Remove-Item -Recurse -Force ''.next''\")",
+      "Bash(npm uninstall:*)",
+      "Bash(powershell -Command \"Get-Process -Name node | Where-Object {$_MainWindowTitle -eq ''''} | Stop-Process -Force\")",
+      "Bash(powershell -Command \"Stop-Process -Name node -Force\")",
+      "Bash(node -e:*)",
+      "Bash(node scripts/run-migration.js:*)",
+      "Bash(node scripts/run-migration.mjs:*)",
+      "Bash(node scripts/check-schema.mjs:*)",
+      "Bash(node scripts/add-partner-type.mjs:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

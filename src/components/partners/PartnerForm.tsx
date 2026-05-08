@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react';
 import { X, MapPin } from 'lucide-react';
 import { usePartnersStore } from '../../stores/partnersStore';
-import { CATEGORY_META, STATUS_META } from '../../data/constants';
+import { CATEGORY_META, STATUS_META, PARTNER_TYPE_META } from '../../data/constants';
 import { ZONE_LIST } from '../../data/zones';
 import MapLocationPicker from '../map/MapLocationPicker';
-import type { Partner, PartnerCategory, ContractStatus, ZoneName } from '../../types';
+import type { Partner, PartnerCategory, ContractStatus, ZoneName, PartnerType } from '../../types';
 
 interface PartnerFormProps {
   partner: Partner | null;
@@ -23,6 +23,7 @@ export default function PartnerForm({ partner, onClose }: PartnerFormProps) {
   const [formData, setFormData] = useState({
     name_en: '',
     name_th: '',
+    partner_type: 'partner' as PartnerType,
     category: 'hospital' as PartnerCategory,
     zone: 'west_coast_kamala_patong' as ZoneName,
     lat: 7.8884,
@@ -37,22 +38,26 @@ export default function PartnerForm({ partner, onClose }: PartnerFormProps) {
   });
 
   useEffect(() => {
-    if (partner && partner.id) {
-      setFormData({
-        name_en: partner.name_en || '',
-        name_th: partner.name_th || '',
-        category: partner.category,
-        zone: partner.zone,
-        lat: partner.lat,
-        lng: partner.lng,
-        strategic_note: partner.strategic_note || '',
-        contract_type: partner.contract?.type || '',
-        contract_status: partner.contract?.status || 'prospect',
-        contract_start_date: partner.contract?.start_date || '',
-        contract_end_date: partner.contract?.end_date || '',
-        contract_renewal_owner: partner.contract?.renewal_owner || '',
-        contract_value: partner.contract?.value?.toString() || '',
-      });
+    if (partner) {
+      // For editing existing partner (has id) or creating new partner from map click (has lat/lng but no id)
+      if (partner.id || (partner.lat !== undefined && partner.lng !== undefined)) {
+        setFormData({
+          name_en: partner.name_en || '',
+          name_th: partner.name_th || '',
+          partner_type: partner.partner_type || 'partner',
+          category: partner.category || 'hospital',
+          zone: partner.zone || 'west_coast_kamala_patong',
+          lat: partner.lat,
+          lng: partner.lng,
+          strategic_note: partner.strategic_note || '',
+          contract_type: partner.contract?.type || '',
+          contract_status: partner.contract?.status || 'prospect',
+          contract_start_date: partner.contract?.start_date || '',
+          contract_end_date: partner.contract?.end_date || '',
+          contract_renewal_owner: partner.contract?.renewal_owner || '',
+          contract_value: partner.contract?.value?.toString() || '',
+        });
+      }
     }
   }, [partner]);
 
@@ -72,6 +77,7 @@ export default function PartnerForm({ partner, onClose }: PartnerFormProps) {
       id: isEditing ? partner.id : `partner-${Date.now()}`,
       name_en: formData.name_en,
       name_th: formData.name_th || undefined,
+      partner_type: formData.partner_type || 'partner', // Ensure always has a value
       category: formData.category,
       zone: formData.zone,
       lat: parseFloat(formData.lat.toString()),
@@ -153,6 +159,25 @@ export default function PartnerForm({ partner, onClose }: PartnerFormProps) {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   placeholder="โรงพยาบาลกรุงเทพศิริโรจน์"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Type <span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="partner_type"
+                  value={formData.partner_type}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                >
+                  {Object.entries(PARTNER_TYPE_META).map(([key, meta]) => (
+                    <option key={key} value={key}>
+                      {meta.icon} {meta.label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>

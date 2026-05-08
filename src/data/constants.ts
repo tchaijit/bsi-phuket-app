@@ -1,4 +1,14 @@
-import type { PartnerCategory, ContractStatus } from '../types';
+import type { PartnerCategory, ContractStatus, PartnerType } from '../types';
+
+// Partner Type Metadata
+export const PARTNER_TYPE_META: Record<
+  PartnerType,
+  { label: string; color: string; icon: string }
+> = {
+  partner: { label: 'Partner', color: '#10b981', icon: '🤝' }, // Green
+  competitor: { label: 'Competitor', color: '#ef4444', icon: '⚔️' }, // Red
+  opportunity: { label: 'Opportunity', color: '#3b82f6', icon: '💎' }, // Blue
+};
 
 // Category Metadata
 export const CATEGORY_META: Record<

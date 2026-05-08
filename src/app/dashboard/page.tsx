@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import dynamicImport from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
@@ -9,7 +9,9 @@ import MainLayout from '@/components/layout/MainLayout';
 import StatsCard from '@/components/dashboard/StatsCard';
 import ContractExpiryChart from '@/components/dashboard/ContractExpiryChart';
 import ZoneDistribution from '@/components/dashboard/ZoneDistribution';
+import PartnerForm from '@/components/partners/PartnerForm';
 import { Building2, FileText, AlertCircle, TrendingUp } from 'lucide-react';
+import type { Partner } from '@/types';
 
 // Disable static generation for this page
 export const dynamic = 'force-dynamic';
@@ -26,6 +28,7 @@ export default function DashboardPage() {
   const checkAuth = useAuthStore((state) => state.checkAuth);
   const partners = usePartnersStore((state) => state.partners);
   const fetchPartners = usePartnersStore((state) => state.fetchPartners);
+  const [editingPartner, setEditingPartner] = useState<Partner | null>(null);
 
   useEffect(() => {
     checkAuth();
@@ -89,10 +92,18 @@ export default function DashboardPage() {
         <div className="bg-white rounded-xl shadow-sm p-6">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">Partner Locations</h2>
           <div className="h-[500px]">
-            <MapView />
+            <MapView onEditPartner={setEditingPartner} />
           </div>
         </div>
       </div>
+
+      {/* Partner Form Modal */}
+      {editingPartner && (
+        <PartnerForm
+          partner={editingPartner}
+          onClose={() => setEditingPartner(null)}
+        />
+      )}
     </MainLayout>
   );
 }

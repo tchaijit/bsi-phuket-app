@@ -10,6 +10,9 @@ export interface User {
   avatar?: string;
 }
 
+// Partner Type
+export type PartnerType = 'partner' | 'competitor' | 'opportunity';
+
 // Partner Categories
 export type PartnerCategory =
   | 'hospital'
@@ -129,6 +132,7 @@ export interface Partner {
   id: string;
   name_en: string;
   name_th?: string;
+  partner_type?: PartnerType; // Optional for backward compatibility
   category: PartnerCategory;
   lat: number;
   lng: number;

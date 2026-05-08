@@ -15,6 +15,7 @@ export const sql = postgres(connectionString, {
   max: 10, // Maximum number of connections
   idle_timeout: 20, // Close idle connections after 20 seconds
   connect_timeout: 10, // Connection timeout in seconds
+  prepare: false, // Disable prepared statements to avoid cache issues after schema changes
 });
 
 // Test connection function
@@ -34,6 +35,7 @@ export type PartnerRow = {
   id: string;
   name_en: string;
   name_th: string | null;
+  partner_type: string | null; // Nullable for backward compatibility
   category: string;
   zone: string;
   lat: number;

@@ -2,24 +2,33 @@
 
 import { useEffect, useRef } from 'react';
 import { usePartnersStore } from '../../stores/partnersStore';
-import { CATEGORY_META, MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM } from '../../data/constants';
+import { CATEGORY_META, PARTNER_TYPE_META, MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM } from '../../data/constants';
 import type { Partner } from '../../types';
 
 interface MapViewProps {
   onMapClick?: (lat: number, lng: number, x: number, y: number) => void;
+  onEditPartner?: (partner: Partner) => void;
   enableClickToAdd?: boolean;
   clearTempMarker?: boolean;
 }
 
-export default function MapView({ onMapClick, enableClickToAdd = false, clearTempMarker = false }: MapViewProps = {}) {
+export default function MapView({ onMapClick, onEditPartner, enableClickToAdd = false, clearTempMarker = false }: MapViewProps = {}) {
   const mapRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
   const tempMarkerRef = useRef<any>(null);
   const isRightClickActiveRef = useRef<boolean>(false);
   const LeafletRef = useRef<any>(null); // Store Leaflet library reference
   const relocatingPartnerRef = useRef<any>(null); // Store partner being relocated
+  const onMapClickRef = useRef(onMapClick); // Store latest onMapClick callback
+  const onEditPartnerRef = useRef(onEditPartner); // Store latest onEditPartner callback
   const filteredPartners = usePartnersStore((state) => state.filteredPartners);
   const selectPartner = usePartnersStore((state) => state.selectPartner);
+
+  // Update refs when callbacks change
+  useEffect(() => {
+    onMapClickRef.current = onMapClick;
+    onEditPartnerRef.current = onEditPartner;
+  }, [onMapClick, onEditPartner]);
 
   useEffect(() => {
     // Initialize map ONLY ONCE - prevent re-initialization
@@ -42,6 +51,13 @@ export default function MapView({ onMapClick, enableClickToAdd = false, clearTem
         iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
         shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
       });
+
+      // Check if map container already has a Leaflet instance
+      const container = L.DomUtil.get('map');
+      if (container && (container as any)._leaflet_id) {
+        // Container already initialized, remove it
+        (container as any)._leaflet_id = null;
+      }
 
       // Use same config as TestMap that works
       mapRef.current = L.map('map', {
@@ -101,7 +117,9 @@ export default function MapView({ onMapClick, enableClickToAdd = false, clearTem
           .addTo(currentMap);
 
         // Call the onMapClick handler with coordinates
-        onMapClick(lat, lng, clientX, clientY);
+        if (onMapClickRef.current) {
+          onMapClickRef.current(lat, lng, clientX, clientY);
+        }
 
         return false;
       });
@@ -149,10 +167,13 @@ export default function MapView({ onMapClick, enableClickToAdd = false, clearTem
       if (typeof partner.lat !== 'number' || typeof partner.lng !== 'number') return;
 
       const categoryMeta = CATEGORY_META[partner.category];
+      const typeMeta = PARTNER_TYPE_META[partner.partner_type || 'partner'];
+
+      // Use partner_type color for marker background
       const icon = LeafletRef.current.divIcon({
         className: 'custom-marker',
         html: `<div style="
-          background: ${categoryMeta.color};
+          background: ${typeMeta.color};
           width: 32px;
           height: 32px;
           border-radius: 50%;
@@ -171,6 +192,17 @@ export default function MapView({ onMapClick, enableClickToAdd = false, clearTem
       const marker = LeafletRef.current.marker([partner.lat, partner.lng], { icon })
         .bindPopup(createPopupContent(partner))
         .on('click', () => selectPartner(partner))
+        .on('popupopen', () => {
+          // Add event listener to Edit button when popup opens
+          const editBtn = document.querySelector(`button.edit-partner-btn[data-partner-id="${partner.id}"]`);
+          if (editBtn) {
+            editBtn.addEventListener('click', () => {
+              if (onEditPartnerRef.current) {
+                onEditPartnerRef.current(partner);
+              }
+            });
+          }
+        })
         .on('contextmenu', (e: any) => {
           e.originalEvent.preventDefault();
 
@@ -280,8 +312,9 @@ export default function MapView({ onMapClick, enableClickToAdd = false, clearTem
 
   const createPopupContent = (partner: Partner): string => {
     const categoryMeta = CATEGORY_META[partner.category];
+    const typeMeta = PARTNER_TYPE_META[partner.partner_type || 'partner']; // Fallback to 'partner' if undefined
     let html = `
-      <div style="min-width: 200px;">
+      <div style="min-width: 220px;">
         <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">
           ${partner.name_en}
         </div>
@@ -292,7 +325,10 @@ export default function MapView({ onMapClick, enableClickToAdd = false, clearTem
     }
 
     html += `
-      <div style="margin-bottom: 8px;">
+      <div style="margin-bottom: 8px; display: flex; gap: 6px; flex-wrap: wrap;">
+        <span style="background: ${typeMeta.color}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;">
+          ${typeMeta.icon} ${typeMeta.label}
+        </span>
         <span style="background: ${categoryMeta.color}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px;">
           ${categoryMeta.label}
         </span>
@@ -315,6 +351,40 @@ export default function MapView({ onMapClick, enableClickToAdd = false, clearTem
         </div>
       `;
     }
+
+    // Add Edit Detail button
+    html += `
+      <button
+        class="edit-partner-btn"
+        data-partner-id="${partner.id}"
+        style="
+          width: 100%;
+          margin-top: 12px;
+          padding: 8px 12px;
+          background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+          color: white;
+          border: none;
+          border-radius: 6px;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          transition: all 0.2s;
+          box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+        "
+        onmouseover="this.style.background='linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(59, 130, 246, 0.4)';"
+        onmouseout="this.style.background='linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(59, 130, 246, 0.3)';"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+        </svg>
+        Edit Detail
+      </button>
+    `;
 
     html += `</div>`;
     return html;

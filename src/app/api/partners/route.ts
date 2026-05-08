@@ -33,6 +33,7 @@ export async function GET() {
         id: p.id,
         name_en: p.name_en,
         name_th: p.name_th || undefined,
+        partner_type: (p.partner_type as any) || 'partner',
         category: p.category as any,
         zone: p.zone as any,
         lat: typeof p.lat === 'string' ? parseFloat(p.lat) : p.lat,
@@ -74,6 +75,7 @@ export async function POST(request: NextRequest) {
     const {
       name_en,
       name_th,
+      partner_type,
       category,
       zone,
       lat,
@@ -93,11 +95,12 @@ export async function POST(request: NextRequest) {
     // Insert partner
     const newPartners = await sql<PartnerRow[]>`
       INSERT INTO partners (
-        name_en, name_th, category, zone, lat, lng, strategic_note, created_by
+        name_en, name_th, partner_type, category, zone, lat, lng, strategic_note, created_by
       )
       VALUES (
         ${name_en},
         ${name_th || null},
+        ${partner_type || 'partner'},
         ${category},
         ${zone},
         ${lat},
@@ -147,6 +150,7 @@ export async function POST(request: NextRequest) {
       id: newPartner.id,
       name_en: newPartner.name_en,
       name_th: newPartner.name_th || undefined,
+      partner_type: (newPartner.partner_type as any) || 'partner',
       category: newPartner.category as any,
       zone: newPartner.zone as any,
       lat: newPartner.lat,

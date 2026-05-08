@@ -21,6 +21,7 @@ CREATE TABLE partners (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name_en VARCHAR(255) NOT NULL,
   name_th VARCHAR(255),
+  partner_type VARCHAR(20) NOT NULL DEFAULT 'partner' CHECK (partner_type IN ('partner', 'competitor', 'opportunity')),
   category VARCHAR(50) NOT NULL CHECK (category IN (
     'hospital',
     'clinic',
@@ -76,6 +77,7 @@ CREATE TABLE activity_log (
 );
 
 -- Create indexes for better performance
+CREATE INDEX idx_partners_partner_type ON partners(partner_type);
 CREATE INDEX idx_partners_category ON partners(category);
 CREATE INDEX idx_partners_zone ON partners(zone);
 CREATE INDEX idx_partners_location ON partners(lat, lng);
