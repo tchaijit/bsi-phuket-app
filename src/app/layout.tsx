@@ -7,6 +7,12 @@ import '../index.css';
 export const metadata: Metadata = {
   title: 'BSI Phuket Partnership Management',
   description: 'Manage partnerships, contracts, and strategic relationships in Phuket',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+  },
 };
 
 export default function RootLayout({

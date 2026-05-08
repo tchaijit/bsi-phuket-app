@@ -13,7 +13,9 @@
       "Bash(node scripts/run-migration.mjs:*)",
       "Bash(node scripts/check-schema.mjs:*)",
       "Bash(node scripts/add-partner-type.mjs:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []

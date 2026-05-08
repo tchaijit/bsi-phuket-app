@@ -64,8 +64,12 @@ export default function MapView({ onMapClick, onEditPartner, enableClickToAdd = 
       scrollWheelZoom: 'center',
       doubleClickZoom: true,
       touchZoom: true,
+      tap: true, // Enable tap interactions on mobile
+      tapTolerance: 15, // Increase tap tolerance for better mobile UX
       boxZoom: true,
       keyboard: true,
+      dragging: true,
+      zoomControl: true,
     }).setView(MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

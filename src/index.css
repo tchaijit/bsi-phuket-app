@@ -94,22 +94,21 @@ body {
   animation: scale-in 0.15s ease-out forwards;
 }
 
-/* Prevent map context menu and zoom behaviors */
+/* Leaflet container settings */
 .leaflet-container {
-  cursor: crosshair;
-  touch-action: none; /* Prevent ALL touch gestures including zoom */
+  cursor: default;
+  touch-action: pan-x pan-y pinch-zoom; /* Allow pan and zoom on mobile */
   user-select: none; /* Prevent text selection */
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
 }
 
-/* Disable browser zoom on map */
+/* Enable touch gestures on map */
 #map {
-  touch-action: none;
-  -ms-touch-action: none;
-  user-select: none;
+  touch-action: pan-x pan-y pinch-zoom; /* Allow pan and pinch-zoom on mobile */
   -webkit-user-select: none;
+  user-select: none;
 }
 
 /* Prevent accidental zoom */
