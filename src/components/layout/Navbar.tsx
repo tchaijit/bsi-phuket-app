@@ -30,7 +30,7 @@ export default function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
           {onMenuClick && (
             <button
               onClick={onMenuClick}
-              className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition"
+              className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition"
             >
               <Menu className="w-5 h-5" />
             </button>

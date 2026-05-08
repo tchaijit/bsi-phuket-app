@@ -10,6 +10,7 @@ import PartnerForm from '@/components/partners/PartnerForm';
 import MapContextMenu from '@/components/map/MapContextMenu';
 import { CATEGORY_META, STATUS_META } from '@/data/constants';
 import type { PartnerCategory, ContractStatus, Partner } from '@/types';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Disable static generation for this page
 export const dynamic = 'force-dynamic';
@@ -43,6 +44,7 @@ export default function MapPage() {
 
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; lat: number; lng: number } | null>(null);
   const [editingPartner, setEditingPartner] = useState<Partner | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true); // Default to open
 
   const handleEditPartner = (partner: Partner) => {
     setEditingPartner(partner);
@@ -87,7 +89,7 @@ export default function MapPage() {
 
   return (
     <MainLayout>
-      <div className="h-full flex">
+      <div className="h-full flex relative">
         {/* Map */}
         <div className="flex-1 relative">
           <MapView
@@ -96,11 +98,60 @@ export default function MapPage() {
             enableClickToAdd={canEdit}
             clearTempMarker={contextMenu === null && editingPartner === null}
           />
+
+          {/* Mobile Toggle Button */}
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="md:hidden absolute top-4 right-4 z-[1000] bg-white p-3 rounded-lg shadow-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+            aria-label="Toggle filters"
+          >
+            <svg
+              className="w-6 h-6 text-gray-700"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              {sidebarOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
         </div>
 
+        {/* Backdrop for mobile */}
+        {sidebarOpen && (
+          <div
+            className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-[999]"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
         {/* Filters Sidebar */}
-        <div className="w-80 bg-white border-l border-gray-200 p-6 overflow-y-auto">
-          <h2 className="text-lg font-bold text-gray-800 mb-4">Map Controls</h2>
+        <div className={`
+          bg-white border-l border-gray-200 overflow-y-auto
+          transition-all duration-300 ease-in-out
+          relative
+          md:relative fixed right-0 top-0 bottom-0 z-[1000]
+          ${sidebarOpen ? 'w-80 p-6' : 'w-0 p-0 md:w-16 md:p-2'}
+          ${sidebarOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}
+        `}>
+          {/* Desktop Toggle Button */}
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="hidden md:block absolute -left-3 top-8 bg-white border border-gray-200 rounded-full p-1 shadow-md hover:bg-gray-50 transition-colors z-10"
+            aria-label="Toggle filters"
+          >
+            {sidebarOpen ? (
+              <ChevronRight className="w-4 h-4 text-gray-600" />
+            ) : (
+              <ChevronLeft className="w-4 h-4 text-gray-600" />
+            )}
+          </button>
+
+          <div className={`${sidebarOpen ? '' : 'hidden'}`}>
+            <h2 className="text-lg font-bold text-gray-800 mb-4">Map Controls</h2>
 
           {/* Right-click Instruction */}
           {canEdit && (
@@ -176,6 +227,7 @@ export default function MapPage() {
                 </label>
               ))}
             </div>
+          </div>
           </div>
         </div>
 

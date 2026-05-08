@@ -52,8 +52,16 @@ export default function MapView({ onMapClick, onEditPartner, enableClickToAdd = 
         shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
       });
 
+      // Wait for DOM to be ready
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       // Check if map container already has a Leaflet instance
       const container = L.DomUtil.get('map');
+      if (!container) {
+        console.error('Map container not found');
+        return;
+      }
+
       if (container && (container as any)._leaflet_id) {
         // Container already initialized, remove it
         (container as any)._leaflet_id = null;
