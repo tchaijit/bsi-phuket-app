@@ -72,8 +72,6 @@ export default function MapView({ onMapClick, onEditPartner, enableClickToAdd = 
       scrollWheelZoom: 'center',
       doubleClickZoom: true,
       touchZoom: true,
-      tap: true, // Enable tap interactions on mobile
-      tapTolerance: 15, // Increase tap tolerance for better mobile UX
       boxZoom: true,
       keyboard: true,
       dragging: true,
